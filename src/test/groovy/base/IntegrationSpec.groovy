@@ -1,5 +1,4 @@
 package base
-
 import eu.solidcraft.starter.conf.init.AppConfiguration
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration

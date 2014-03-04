@@ -1,5 +1,8 @@
 package eu.solidcraft.starter.conf
 
+import groovy.transform.TypeChecked
+
+@TypeChecked
 class Profiles {
     static final String DEFAULT = 'default';
     static final String PRODUCTION = 'starter.production';

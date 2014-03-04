@@ -1,67 +1,54 @@
 package eu.solidcraft.starter.conf.init
+
 import groovy.transform.TypeChecked
-import org.apache.tomcat.jdbc.pool.DataSource
-import org.hsqldb.jdbc.JDBCDriver
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import org.springframework.orm.jpa.JpaTransactionManager
-import org.springframework.orm.jpa.JpaVendorAdapter
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.orm.jpa.vendor.Database
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.EnableTransactionManagement
 
-import javax.persistence.EntityManagerFactory
+import javax.sql.DataSource
 
 @TypeChecked
 @Configuration
+@EnableJpaRepositories(basePackages = ["eu.solidcraft.starter"])
+@EnableTransactionManagement
 class EmbeddedDatabaseConfiguration {
+    private final static String PACKAGES_WITH_JPA_ENTITIES = "eu.solidcraft.starter.domain"
 
     @Bean
-    javax.sql.DataSource dataSource() {
-        DataSource dataSource = new DataSource()
-        dataSource.driverClassName = JDBCDriver
-        dataSource.url = "jdbc:hsqldb:mem:springStarterDevDb"
-        dataSource.password = "SA"
-        return dataSource
+    DataSource dataSource() {
+        EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder()
+        return builder.setType(EmbeddedDatabaseType.HSQL).build()
     }
 
     @Bean
     LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean managerFactoryBean = new LocalContainerEntityManagerFactoryBean()
-        managerFactoryBean.dataSource = dataSource()
-        managerFactoryBean.packagesToScan = "eu.solidcraft.starter"
-        managerFactoryBean.jpaVendorAdapter = createHibernateJpaVendorAdapter()
-        managerFactoryBean.jpaProperties = createJpaProperties()
-        return managerFactoryBean
+        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean()
+        factory.setJpaVendorAdapter(hibernateJpaVendorAdapter())
+        factory.setPackagesToScan(PACKAGES_WITH_JPA_ENTITIES)
+        factory.setDataSource(dataSource())
+        return factory
     }
 
-    private Properties createJpaProperties() {
-        Properties properties = new Properties()
-        properties.setProperty("hibernate.cache.use_second_level_cache", "true")
-        properties.setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory")
-        properties.setProperty("hibernate.cache.use_query_cache", "true")
-        properties.setProperty("hibernate.generate_statistics", "true")
-        properties.setProperty("hibernate.hbm2ddl.auto", "create)")
-        return properties
-    }
-
-    private JpaVendorAdapter createHibernateJpaVendorAdapter() {
-        HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter()
-        jpaVendorAdapter.generateDdl = true
-        jpaVendorAdapter.showSql = true
-        //jpaVendorAdapter.databasePlatform = org.hibernate.dialect.HSQLDialect
-        jpaVendorAdapter.database = Database.HSQL
-        return jpaVendorAdapter
+    private HibernateJpaVendorAdapter hibernateJpaVendorAdapter() {
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter()
+        vendorAdapter.setDatabase(Database.HSQL)
+        vendorAdapter.setGenerateDdl(true)
+        vendorAdapter.setShowSql(true)
+        return vendorAdapter
     }
 
     @Bean
-    @Autowired
-    JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-        JpaTransactionManager transactionManager = new JpaTransactionManager()
-        transactionManager.entityManagerFactory = entityManagerFactory
-        transactionManager.jpaDialect = new HibernateJpaDialect()
-        return transactionManager
+    PlatformTransactionManager transactionManager() {
+        JpaTransactionManager txManager = new JpaTransactionManager()
+        txManager.setEntityManagerFactory(entityManagerFactory().getObject())
+        return txManager
     }
 }

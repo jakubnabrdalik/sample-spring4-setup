@@ -1,11 +1,14 @@
 package eu.solidcraft.starter.domain.some
 
+import groovy.transform.TypeChecked
+
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.SequenceGenerator
 import javax.validation.constraints.NotNull
 
+@TypeChecked
 @Entity
 class SomeEntity {
     @Id
