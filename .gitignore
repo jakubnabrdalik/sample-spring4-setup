@@ -1,6 +1,11 @@
-*.class
+.gradle
+.idea
+*.iml
+build
+*.ipr
+*.iws
+out
+springStarterTestDb.*
+springStarterDb.*
+classes
 
-# Package Files #
-*.jar
-*.war
-*.ear
