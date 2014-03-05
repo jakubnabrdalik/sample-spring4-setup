@@ -11,17 +11,16 @@ class SomeControllerIntegrationSpec extends IntegrationSpec {
     @Autowired SomeController someController
     BigDecimal amount = new BigDecimal(1000)
 
+    Closure matchAmountUserName = {it.someAmount == amount && it.username == loggedUserRepository.getLoggedUserName()}
+
     def "add should save entity to DB"() {
         when:
             someController.add(amount)
 
         then:
             List<SomeEntity> entities = someEntityRepository.findByUsername(loggedUserRepository.getLoggedUserName())
-            entities.size() == 1
-            SomeEntity someEntity = entities.first()
-            someEntity.someAmount == amount
-            someEntity.username == loggedUserRepository.getLoggedUserName()
-    }
+            entities.count {matchAmountUserName} == 1
+            }
 
     def "should show my entities"() {
         given:
@@ -31,8 +30,6 @@ class SomeControllerIntegrationSpec extends IntegrationSpec {
             Map response = someController.mine()
 
         then:
-            SomeEntity someEntity = response.entities.first()
-            someEntity.someAmount == amount
-            someEntity.username == loggedUserRepository.getLoggedUserName()
+            response.entities.count {matchAmountUserName } == 1
     }
 }
