@@ -22,8 +22,7 @@ import javax.sql.DataSource
 class EmbeddedDatabaseConfiguration {
     private final static String PACKAGES_WITH_JPA_ENTITIES = "eu.solidcraft.starter.domain"
 
-    @Bean
-    DataSource dataSource() {
+    private DataSource dataSource() {
         EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder()
         return builder.setType(EmbeddedDatabaseType.HSQL).build()
     }
