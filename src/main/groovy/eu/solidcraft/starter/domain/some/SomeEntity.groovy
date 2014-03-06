@@ -23,15 +23,31 @@ class SomeEntity {
     private BigDecimal someAmount;
 
     @NotNull
+    private BigDecimal interestRate;
+
+    @NotNull
     private Date someDate;
 
     private SomeEntity() {
     }
 
     SomeEntity(String username, BigDecimal someAmount, Date someDate) {
+        this(username, someAmount, 0.10, someDate)
+    }
+
+    SomeEntity(String username, BigDecimal someAmount, BigDecimal interestRate, Date someDate) {
         this.username = username
         this.someAmount = someAmount
+        this.interestRate = interestRate
         this.someDate = someDate
+    }
+
+    // TODO: round to one decimal place
+    BigDecimal calculateCommission() {
+        def commissionRate = someDate.after(new Date(2010, 1, 1)) ? interestRate * 0.22 : interestRate * 0.23
+        def commission = commissionRate * someAmount
+        return commission.setScale(2)
+
     }
 
     Long getId() {
